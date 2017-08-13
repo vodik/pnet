@@ -25,7 +25,7 @@ def test_parse_packet_from_bytes():
     assert ipv4['p'] == socket.IPPROTO_UDP
     assert ipv4['len'] == 139
 
-    udp = pnet.parse('udp', ipv4.payload)
+    udp = ipv4.parse('udp')
     assert udp.readonly
     assert udp['sport'] == 2130
     assert udp['dport'] == 514
@@ -58,7 +58,7 @@ def test_parse_packet_from_bytearray():
     assert ipv4['p'] == socket.IPPROTO_UDP
     assert ipv4['len'] == 139
 
-    udp = pnet.parse('udp', ipv4.payload)
+    udp = ipv4.parse('udp')
     assert not udp.readonly
     assert udp['sport'] == 2130
     assert udp['dport'] == 514
@@ -90,7 +90,7 @@ def test_parse_tcp_packet():
     assert ipv4['p'] == socket.IPPROTO_TCP
     assert ipv4['len'] == 126
 
-    tcp = pnet.parse('tcp', ipv4.payload)
+    tcp = ipv4.parse('tcp')
     assert tcp.readonly
     assert tcp['sport'] == 46342
     assert tcp['dport'] == 80

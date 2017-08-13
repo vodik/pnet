@@ -1,4 +1,5 @@
 import struct
+from .. import entrypoints
 
 
 def configure_packet_header(hdrs, header_fmt):
@@ -70,3 +71,6 @@ class Packet(metaclass=MetaPacket):
     @property
     def readonly(self):
         return self._view.readonly
+
+    def parse(self, name):
+        return entrypoints.get_parsers()[name](self.payload)
