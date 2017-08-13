@@ -70,23 +70,3 @@ class Packet(metaclass=MetaPacket):
     @property
     def readonly(self):
         return self._view.readonly
-
-
-class IP(Packet):
-    __header__ = (("v_hl", "B"),
-                  ("tos", "B"),
-                  ("len", "H"),
-                  ("id", "H"),
-                  ("frag_off", "H"),
-                  ("ttl", "B"),
-                  ("p", "B"),
-                  ("sum", "H"),
-                  ("src", "4s"),
-                  ("dst", "4s"))
-
-
-class UDP(Packet):
-    __header__ = (('sport', 'H'),
-                  ('dport', 'H'),
-                  ('len', 'H'),
-                  ('csum', 'H'))
