@@ -1,34 +1,8 @@
 from ipaddress import IPv4Address
 import socket
 
-from pnet.packet.ipv4 import IPv4
-from pnet.packet.udp import UDP
+import pnet
 import pytest
-
-
-# Set protocol field to a value not yet assigned by IANA.
-# Set total length field to zero.
-# Set total length field to maximum size.
-# Set IHL and total length fields so that header goes past end of datagram.
-# Destination address is set to the loopback '127.0.0.1' address.
-# Destination address is set to '0.0.0.0' broadcast address.
-# Destination address is set to '255.255.255.255' broadcast address.
-# Source address is set to the '0.0.0.0' broadcast address.
-# Source address is set to the loopback '127.0.0.1' address.
-# Protocol field is 200 (unassigned) and source address is a broadcast address.
-# Protocol field is 200 (unassigned) and source address is a loopback address.
-# TTL field is zero and source address is a broadcast address.
-# Datagram is truncated so protocol field indicates another protocol follows, but none does.
-# IPv4 version field set to value other than 4.
-# Adjust header so checksum is -0 and set checksum field to -0.
-# Adjust header so checksum is -0 and set checksum field to +0.
-# Adjust header so checksum is +1 and set checksum field to +0.
-# Verify processing of TTL field.
-# Change ICMPv4 destination address to '224.0.0.1' multicast address.
-# Check for continuous dead gateway detection pinging.
-# Check for dead gateway detection pinging while traffic being sent.
-# Verify link layer broadcasts with specific addresses are discarded.
-# Verify that ICMPv4 host and net redirects are treated the same.
 
 
 def test_parse_packet_from_bytes():
@@ -44,14 +18,14 @@ def test_parse_packet_from_bytes():
         '6973 706c 6179 206f 6666 0a'
     )
 
-    ip4 = IPv4(data)
-    assert ip4.readonly
-    assert ip4['src'] == IPv4Address('10.10.11.20').packed
-    assert ip4['dst'] == IPv4Address('10.200.0.5').packed
-    assert ip4['p'] == socket.IPPROTO_UDP
-    assert ip4['len'] == 139
+    ipv4 = pnet.parse('ipv4', data)
+    assert ipv4.readonly
+    assert ipv4['src'] == IPv4Address('10.10.11.20').packed
+    assert ipv4['dst'] == IPv4Address('10.200.0.5').packed
+    assert ipv4['p'] == socket.IPPROTO_UDP
+    assert ipv4['len'] == 139
 
-    udp = UDP(ip4.payload)
+    udp = pnet.parse('udp', ipv4.payload)
     assert udp.readonly
     assert udp['sport'] == 2130
     assert udp['dport'] == 514
@@ -76,14 +50,14 @@ def test_parse_packet_from_bytearray():
         '6973 706c 6179 206f 6666 0a'
     )
 
-    ip4 = IPv4(data)
-    assert not ip4.readonly
-    assert ip4['src'] == IPv4Address('10.10.11.20').packed
-    assert ip4['dst'] == IPv4Address('10.200.0.5').packed
-    assert ip4['p'] == socket.IPPROTO_UDP
-    assert ip4['len'] == 139
+    ipv4 = pnet.parse('ipv4', data)
+    assert not ipv4.readonly
+    assert ipv4['src'] == IPv4Address('10.10.11.20').packed
+    assert ipv4['dst'] == IPv4Address('10.200.0.5').packed
+    assert ipv4['p'] == socket.IPPROTO_UDP
+    assert ipv4['len'] == 139
 
-    udp = UDP(ip4.payload)
+    udp = pnet.parse('udp', ipv4.payload)
     assert not udp.readonly
     assert udp['sport'] == 2130
     assert udp['dport'] == 514

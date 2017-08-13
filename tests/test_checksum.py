@@ -1,6 +1,4 @@
 import pnet
-from pnet.packet.ipv4 import IPv4
-from pnet.packet.udp import UDP
 import pytest
 
 
@@ -17,12 +15,12 @@ def test_checksum_udp_in_ipv4():
         '6973 706c 6179 206f 6666 0a'
     )
 
-    ip4 = IPv4(data)
-    udp = UDP(ip4.payload)
+    ipv4 = pnet.parse('ipv4', data)
+    udp = pnet.parse('udp', ipv4.payload)
 
     original_csum = udp['csum']
-    assert pnet.ipv4_checksum(ip4, udp, udp.payload) == 0
+    assert pnet.ipv4_checksum(ipv4, udp, udp.payload) == 0
 
     udp['csum'] = 0
-    csum = pnet.ipv4_checksum(ip4, udp, udp.payload)
+    csum = pnet.ipv4_checksum(ipv4, udp, udp.payload)
     assert csum == original_csum

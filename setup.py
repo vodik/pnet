@@ -21,6 +21,14 @@ setup(
     url='https://github.com/vodik/pnet',
     description='Fast zero-copy packet creating and parsing module',
     long_description=read('README.rst'),
+    entry_points={
+        'pnet.packet': [
+            'ethernet = pnet.packet.ethernet:Ethernet',
+            'ipv4 = pnet.packet.ipv4:IPv4',
+            'sll = pnet.packet.sll:Cooked',
+            'udp = pnet.packet.udp:UDP',
+        ]
+    },
     classifiers=[
         'Development Status :: 4 - Beta',
 	"Intended Audience :: Developers",
