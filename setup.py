@@ -26,6 +26,7 @@ setup(
             'ethernet = pnet.packet.ethernet:Ethernet',
             'ipv4 = pnet.packet.ipv4:IPv4',
             'sll = pnet.packet.sll:Cooked',
+            'tcp = pnet.packet.tcp:TCP',
             'udp = pnet.packet.udp:UDP',
         ]
     },

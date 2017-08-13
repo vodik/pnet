@@ -33,8 +33,9 @@ def test_parse_packet_from_bytes():
 
     payload = udp.payload
     assert payload.readonly
-    payload == (b'<54>Jul 29 19:49:45 vega4x4 TELNET : LOG: 29/07/2017 '
-                b'19:49:45.000 TELNET (C)R01C00 (user:admin)log display off\n')
+    assert payload == (b'<54>Jul 29 19:49:45 vega4x4 TELNET : LOG: 29/07/2017 '
+                       b'19:49:45.000 TELNET (C)R01C00 (user:admin)'
+                       b'log display off\n')
 
 
 def test_parse_packet_from_bytearray():
@@ -65,5 +66,39 @@ def test_parse_packet_from_bytearray():
 
     payload = udp.payload
     assert not payload.readonly
-    payload == (b'<54>Jul 29 19:49:45 vega4x4 TELNET : LOG: 29/07/2017 '
-                b'19:49:45.000 TELNET (C)R01C00 (user:admin)log display off\n')
+    assert payload == (b'<54>Jul 29 19:49:45 vega4x4 TELNET : LOG: 29/07/2017 '
+                       b'19:49:45.000 TELNET (C)R01C00 (user:admin)'
+                       b'log display off\n')
+
+
+def test_parse_tcp_packet():
+    data = bytes.fromhex(
+        '4500 007e 5376 4000 4006 62c7 ac10 2a65'
+        'acd9 00ee b506 0050 9933 d7ed 8c4e f15b'
+        '8018 00e5 0238 0000 0101 080a 8502 aff1'
+        'c7cc 571a 4745 5420 2f20 4854 5450 2f31'
+        '2e31 0d0a 486f 7374 3a20 676f 6f67 6c65'
+        '2e63 6f6d 0d0a 5573 6572 2d41 6765 6e74'
+        '3a20 6375 726c 2f37 2e35 342e 310d 0a41'
+        '6363 6570 743a 202a 2f2a 0d0a 0d0a'
+    )
+
+    ipv4 = pnet.parse('ipv4', data)
+    assert ipv4.readonly
+    assert ipv4['src'] == IPv4Address('172.16.42.101').packed
+    assert ipv4['dst'] == IPv4Address('172.217.0.238').packed
+    assert ipv4['p'] == socket.IPPROTO_TCP
+    assert ipv4['len'] == 126
+
+    tcp = pnet.parse('tcp', ipv4.payload)
+    assert tcp.readonly
+    assert tcp['sport'] == 46342
+    assert tcp['dport'] == 80
+
+    payload = tcp.payload
+    assert payload.readonly
+    assert payload == (b'GET / HTTP/1.1\r\n'
+                       b'Host: google.com\r\n'
+                       b'User-Agent: curl/7.54.1\r\n'
+                       b'Accept: */*\r\n'
+                       b'\r\n')
