@@ -2,26 +2,20 @@ import struct
 from .. import entrypoints
 
 
-def configure_packet_header(hdrs, header_fmt):
-    for attr, fmt in hdrs:
-        header_fmt.append(fmt)
-        yield attr
-
-
 class MetaPacket(type):
     def __new__(mcs, clsname, clsbases, clsdict):
         headers = clsdict.get('__header__', [])
-        header_format_order = clsdict.get('__byte_order__', '>')
-        header_format = [header_format_order]
+        if headers:
+            header_attrs, header_fmt = zip(*headers)
+            header_format_order = clsdict.get('__byte_order__', '>')
+            header_format = [header_format_order] + list(header_fmt)
+            header_struct = struct.Struct(''.join(header_format))
 
-        slots = tuple(configure_packet_header(headers, header_format))
-        header_struct = struct.Struct(''.join(header_format))
-
-        clsdict['__slots__'] = ('_fields', '_view', '_payload')
-        clsdict['_header_fields'] = slots
-        clsdict['_header_bytes_order'] = header_format_order
-        clsdict['_header_struct'] = header_struct
-        clsdict['_header_size'] = header_struct.size
+            clsdict['__slots__'] = ('_fields', '_view', '_payload')
+            clsdict['_header_fields'] = tuple(header_attrs)
+            clsdict['_header_bytes_order'] = header_format_order
+            clsdict['_header_struct'] = header_struct
+            clsdict['_header_size'] = header_struct.size
 
         return type.__new__(mcs, clsname, clsbases, clsdict)
 
